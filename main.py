@@ -1,8 +1,10 @@
 # for name generator api you may use: https://github.com/skeeto/fantasyname/blob/master/js/namegen.js
-
+from flask import Flask
 from random import Random
 import traits
 import os
+
+app = Flask(__name__)
 
 
 class Colors:
@@ -16,6 +18,17 @@ class Colors:
     UNDERLINE = '\033[4m'
 
 
+class HTMLColors:
+    HEADER = '<span style="color: #5e81ac;">'
+    OKBLUE = '<span style="color: #3e6ea5;">'
+    OKGREEN = '<span style="color: #2e7d32;">'
+    WARNING = '<span style="color: #f57f17;">'
+    FAIL = '<span style="color: #d32f2f;">'
+    ENDC = '</span>'
+    BOLD = '<span style="font-weight: bold;">'
+    UNDERLINE = '<span style="text-decoration: underline;">'
+
+
 def cls():
     os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -24,7 +37,8 @@ def traits_string(generator,
                   trait_list,
                   number_of_traits=3,
                   color=Colors.FAIL,
-                  sep=", "):
+                  sep=", ",
+                  color_end_tag=Colors.ENDC):
     trait_list_copy = trait_list.copy()
     selected_traits = set()
     for _ in range(0, number_of_traits):
@@ -33,10 +47,10 @@ def traits_string(generator,
         trait_list_copy.remove(trait)
 
     result = ", ".join(selected_traits)
-    return f"{color}{result}{Colors.ENDC}"
+    return f"{color}{result}{color_end_tag}"
 
 
-def trait_generator(generator, seed, number_of_traits):
+def trait_generator_console(generator, seed, number_of_traits):
     iteration = 0
     while True:
         print("\n")
@@ -63,7 +77,40 @@ def trait_generator(generator, seed, number_of_traits):
             break
 
 
-def main(*args, **kwargs):
+def trait_generator_html(generator, seed, number_of_traits):
+    iteration = 0
+    while True:
+        html = ""
+        negative = traits_string(generator,
+                                 traits.negative,
+                                 number_of_traits,
+                                 HTMLColors.FAIL,
+                                 sep=", ",
+                                 color_end_tag=HTMLColors.ENDC)
+        neutral = traits_string(generator,
+                                traits.neutral,
+                                number_of_traits,
+                                HTMLColors.OKBLUE,
+                                sep=", ",
+                                color_end_tag=HTMLColors.ENDC)
+        positive = traits_string(generator,
+                                 traits.positive,
+                                 number_of_traits,
+                                 Colors.OKGREEN,
+                                 sep=", ",
+                                 color_end_tag=HTMLColors.ENDC)
+
+        html += f"Negative traits:<br />{negative}<br />"
+        html += f"Neutral traits:<br />{neutral}<br />"
+        html += f"Possitive traits:<br />{positive}<br />"
+
+        iteration += 1
+        html += f"<br />Refresh page to generate another traits.<br />Iteration: {iteration}, seed: {seed}"
+
+        yield html
+
+
+def main_console(*args, **kwargs):
     cls()
     while True:
         print("Welcome to random traits generator.")
@@ -88,8 +135,24 @@ def main(*args, **kwargs):
         trait_generator(generator, seed, number_of_traits)
 
 
-if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        print("Goodbye!")
+def main(*args, **kwargs):
+    seed = kwargs.get("seed", None)
+    number_of_traits = kwargs.get("number_of_traits", 3)
+    generator = Random() if seed is None else Random(seed)
+
+    trait_generator = trait_generator_html(generator, seed, number_of_traits)
+    return "Random character traits:<br />" + next(trait_generator)
+
+
+@app.route('/')
+def index():
+    return main()
+
+
+# if __name__ == "__main__":
+# try:
+#     main_console()
+# except KeyboardInterrupt:
+#     print("Goodbye!")
+
+app.run(host='0.0.0.0', port=81)
