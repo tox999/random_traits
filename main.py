@@ -46,7 +46,7 @@ def traits_string(generator,
         selected_traits.add(trait)
         trait_list_copy.remove(trait)
 
-    result = ", ".join(selected_traits)
+    result = sep.join(selected_traits)
     return f"{color}{result}{color_end_tag}"
 
 
@@ -79,30 +79,31 @@ def trait_generator_console(generator, seed, number_of_traits):
 
 def trait_generator_html(generator, seed, number_of_traits):
     iteration = 0
+    separator = ", "
     while True:
         html = ""
         negative = traits_string(generator,
                                  traits.negative,
                                  number_of_traits,
                                  HTMLColors.FAIL,
-                                 sep=", ",
+                                 sep=separator,
                                  color_end_tag=HTMLColors.ENDC)
         neutral = traits_string(generator,
                                 traits.neutral,
                                 number_of_traits,
                                 HTMLColors.OKBLUE,
-                                sep=", ",
+                                sep=separator,
                                 color_end_tag=HTMLColors.ENDC)
         positive = traits_string(generator,
                                  traits.positive,
                                  number_of_traits,
-                                 Colors.OKGREEN,
-                                 sep=", ",
+                                 HTMLColors.OKGREEN,
+                                 sep=separator,
                                  color_end_tag=HTMLColors.ENDC)
 
-        html += f"Negative traits:<br />{negative}<br />"
-        html += f"Neutral traits:<br />{neutral}<br />"
-        html += f"Possitive traits:<br />{positive}<br />"
+        html += f"<p><strong>Negative traits:</strong><br />&nbsp;{negative}<br /></p>"
+        html += f"<p><strong>Neutral traits:</strong><br />&nbsp;{neutral}<br /><p/>"
+        html += f"<p><strong>Positive traits:</strong><br />&nbsp;{positive}<br /><p/>"
 
         iteration += 1
         html += f"<br />Refresh page to generate another traits.<br />Iteration: {iteration}, seed: {seed}"
@@ -141,7 +142,8 @@ def main(*args, **kwargs):
     generator = Random() if seed is None else Random(seed)
 
     trait_generator = trait_generator_html(generator, seed, number_of_traits)
-    return "Random character traits:<br />" + next(trait_generator)
+    style = f"<html style='background-color:black; color:White; font: Noto-sans;'>"
+    return f"{style}<h1>Random character traits:</h1>{next(trait_generator)}</html>"
 
 
 @app.route('/')
