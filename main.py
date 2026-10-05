@@ -50,6 +50,10 @@ def traits_string(generator,
     return f"{color}{result}{color_end_tag}"
 
 
+def pick_favourite_color(generator):
+    return generator.choice(traits.favourite_colors)
+
+
 def trait_generator_console(generator, seed, number_of_traits):
     iteration = 0
     while True:
@@ -66,6 +70,7 @@ def trait_generator_console(generator, seed, number_of_traits):
         print(
             traits_string(generator, traits.positive, number_of_traits,
                           Colors.OKGREEN))
+        print(f"Favourite color: {pick_favourite_color(generator)}")
         print("\n")
         iteration += 1
         print("Generate another? (y/n)")
@@ -101,10 +106,15 @@ def trait_generator_html(generator, seed, number_of_traits):
                                  sep=separator,
                                  color_end_tag=HTMLColors.ENDC)
 
+        favourite_color = pick_favourite_color(generator)
+
         html += f"<p><strong>Negative traits:</strong><br />&nbsp;{negative}<br /></p>"
         html += f"<p><strong>Neutral traits:</strong><br />&nbsp;{neutral}<br /><p/>"
         html += f"<p><strong>Positive traits:</strong><br />&nbsp;{positive}<br /><p/>"
 
+        html += (f"<p><strong>Favourite color:</strong><br />&nbsp;"
+                 f"<span style=\"color: {favourite_color};\">{favourite_color}"
+                 f"</span><br /><p/>")
         iteration += 1
         html += f"<br />Refresh page to generate another traits.<br />Iteration: {iteration}, seed: {seed}"
 
